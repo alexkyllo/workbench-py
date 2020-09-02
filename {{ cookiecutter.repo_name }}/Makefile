@@ -1,29 +1,57 @@
-.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3
+# Makefile
+# This is an example Makefile to help you get familiar with GNU Make
+# and get started with using it to automate your project build tasks.
+# For the full GNU Make manual, see:
+# https://www.gnu.org/software/make/manual/make.html
+#
+# A Makefile consists of rules, which take following form:
+# target … : prerequisites …
+#        recipe
+#        …
+#        …
+#
+# Multiple targets and prerequisites are separated by spaces;
+# multiple recipes are separated by newlines.
+#
+# If the target file exists, and the file has not been modified since any
+# of its prerequisite files were last modified, the rule will be skipped.
+# This means that it won't redo any work that it doesn't need to!
+#
+# Some things to note:
+# - Indentation must be tabs--Make will error if you use spaces.
+# - To break a long line, use a backslash: \
+# - If you just type "make" at the command line in the directory
+# where the Makefile is, it will run the first recipe
+# (after running its prerequisites).
+# - Other than that, the ordering of the rules in the file doesn't matter.
+# Make builds a dependency graph and performs a topological sort to determine
+# the correct rule execution order.
+# - If you type "make {rule name}" it will run that specific rule name
+# (again, after running its prerequisites).
+# - If you type "make -n" it will tell you what it's going to run without
+# actually running it (a dry run).
+#
+# This includes your .env file variables in the Makefile
+include .env
+export
 
-#################################################################################
-# GLOBALS                                                                       #
-#################################################################################
+# Rules can either be file names (a rule for producing a file)
+# or just task names that aren't files, called "phony rules."
+# List any phony rules here so that Make knows not to look for
+# files by these names:
+.PHONY: style environment install data figures reports
 
-PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-BUCKET = {{ cookiecutter.s3_bucket }}
-PROFILE = {{ cookiecutter.aws_profile }}
-PROJECT_NAME = {{ cookiecutter.repo_name }}
-PYTHON_INTERPRETER = {{ cookiecutter.python_interpreter }}
-
-ifeq (,$(shell which conda))
-HAS_CONDA=False
-else
-HAS_CONDA=True
-endif
+# Change this to python3 if needed depending on your environment setup
+PYTHON_INTERPRETER=python
 
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
 
-## Install Python Dependencies
-requirements: test_environment
-	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
-	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+## One-time conda environment setup
+environment:
+	conda env create -f environment.yml || conda env update -f environment.yml
+	@echo ">>> Conda env created. Activate with:\nconda activate $(REPO_NAME)"
 
 ## Make Dataset
 data: requirements
@@ -38,39 +66,9 @@ clean:
 lint:
 	flake8 src
 
-## Upload Data to S3
-sync_data_to_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync data/ s3://$(BUCKET)/data/
-else
-	aws s3 sync data/ s3://$(BUCKET)/data/ --profile $(PROFILE)
-endif
-
-## Download Data from S3
-sync_data_from_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync s3://$(BUCKET)/data/ data/
-else
-	aws s3 sync s3://$(BUCKET)/data/ data/ --profile $(PROFILE)
-endif
-
-## Set up python interpreter environment
-create_environment:
-ifeq (True,$(HAS_CONDA))
-		@echo ">>> Detected conda, creating conda environment."
-ifeq (3,$(findstring 3,$(PYTHON_INTERPRETER)))
-	conda create --name $(PROJECT_NAME) python=3
-else
-	conda create --name $(PROJECT_NAME) python=2.7
-endif
-		@echo ">>> New conda env created. Activate with:\nsource activate $(PROJECT_NAME)"
-else
-	$(PYTHON_INTERPRETER) -m pip install -q virtualenv virtualenvwrapper
-	@echo ">>> Installing virtualenvwrapper if not already installed.\nMake sure the following lines are in shell startup file\n\
-	export WORKON_HOME=$$HOME/.virtualenvs\nexport PROJECT_HOME=$$HOME/Devel\nsource /usr/local/bin/virtualenvwrapper.sh\n"
-	@bash -c "source `which virtualenvwrapper.sh`;mkvirtualenv $(PROJECT_NAME) --python=$(PYTHON_INTERPRETER)"
-	@echo ">>> New virtualenv created. Activate with:\nworkon $(PROJECT_NAME)"
-endif
+## Format using black
+fmt:
+	black .
 
 ## Test python environment is setup correctly
 test_environment:
