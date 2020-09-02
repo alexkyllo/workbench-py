@@ -1,0 +1,26 @@
+name: {{ cookiecutter.package_name }}
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - azure-storage-blob
+  - black
+  - flake8
+  - ipykernel
+  - joblib
+  - jupyter
+  - jupytext
+  - make
+  - matplotlib
+  - myst-parser
+  - numpy
+  - pandas
+  - pip
+  - pre-commit
+  - pylint
+  - python=3.8
+  - seaborn
+  - scikit-learn
+  - scipy
+  - pip:
+      - azure-kusto-data

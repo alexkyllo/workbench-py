@@ -1,5 +1,6 @@
 {
-  "repo_name": "project directory name",
+  "repo_name": "A name for the project directory",
+  "package_name": "{{ cookiecutter.repo_name.lower().replace(' ', '_').replace('-', '_') }}",
   "author_name": "Your name",
   "description": "A short description of the project.",
   "blob_account": "[OPTIONAL] your-azure-blob-storage-account-name",
