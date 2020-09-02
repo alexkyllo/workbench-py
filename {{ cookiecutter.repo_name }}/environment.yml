@@ -9,12 +9,15 @@ dependencies:
   - ipykernel
   - joblib
   - jupyter
+  - jupyter_contrib_nbextensions
   - jupytext
   - make
   - matplotlib
   - myst-parser
+  - nbconvert
   - numpy
   - pandas
+  - pandoc
   - pip
   - pre-commit
   - pylint

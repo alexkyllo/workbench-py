@@ -50,14 +50,6 @@ environment:
 	conda env create -f environment.yml || conda env update -f environment.yml
 	@echo ">>> Conda env created. Activate with:\nconda activate $(REPO_NAME)"
 
-## Make Dataset
-data: data/raw/raw_data.csv
-
-data/raw/raw_data.csv: $(PACKAGE_NAME)/get.py
-	$(PYTHON) $(PACKAGE_NAME)/get.py help Samples queries/query.csl \
-$(BLOB_ACCOUNT) $(BLOB_CONTAINER) $(BLOB_KEY) $(REPO_NAME) raw_data \
-data/raw/raw_data.csv
-
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
@@ -75,7 +67,65 @@ fmt:
 # PROJECT RULES                                                                 #
 #################################################################################
 
+## A rule to run all the project tasks
+all: data models figures notebooks reports
 
+## Render the HTML report
+reports: reports/report.html
+
+reports/report.html: notebooks/notebook.ipynb
+	nbconvert $<
+
+## Render the notebook from the Markdown file
+notebooks: notebooks/notebook.ipynb
+
+notebooks/notebook.ipynb: $(PACKAGE_NAME)/report.md
+	jupytext $< $@ --execute
+
+## Plot figures
+figures: figures/scatter_plot.png
+
+# A recipe for a data visualization.
+figures/scatter_plot.png : $(PACKAGE_NAME)/plot.py data/processed/scored_data.csv
+	$(PYTHON) $^ $@
+
+## Train models
+models: models/model.joblib
+
+## Make Dataset
+data: data/processed/train_data.csv
+
+# A recipe for a processed data file.
+# This recipe says that data/processed/processed_data.csv depends on
+# {{ cookiecutter.package_name }}/clean.py and data/raw/raw_data.csv.
+# The recipe to make it is running the clean.py script
+# with the given arguments.
+# $< is shorthand for "the first prerequisite in the list."
+# $^ is all of the prerequisites in the list
+# $@ is the target name
+data/processed/train_data.csv: $(PACKAGE_NAME)/clean.py data/raw/raw_train_data.csv
+	$(PYTHON) $^ $@ --fit
+
+data/processed/test_data.csv: $(PACKAGE_NAME)/clean.py data/raw/raw_test_data.csv
+	$(PYTHON) $^ $@
+
+data/raw/raw_data.csv: $(PACKAGE_NAME)/get.py
+	$(PYTHON) $< help Samples queries/query.csl \
+$(BLOB_ACCOUNT) $(BLOB_CONTAINER) $(BLOB_KEY) $(REPO_NAME) raw_data \
+data/raw/raw_data.csv
+
+# A recipe for a trained, serialized ML model.
+models/model.joblib: $(PACKAGE_NAME)/train.py data/processed/train_data.csv
+	$(PYTHON) $^ $@
+
+# A recipe for splitting raw data into train and test sets
+data/raw/raw_test_data.csv data/raw/raw_train_data.csv &: $(PACKAGE_NAME)/split.py \
+data/raw/raw_data.csv
+	$(PYTHON) $^ data/raw/raw_test_data.csv data/raw/raw_train_data.csv
+
+# A recipe for scoring the model on test data.
+data/processed/scored_data.csv: $(PACKAGE_NAME)/score.py data/processed/test_data.csv
+	$(PYTHON) $^ $@
 
 #################################################################################
 # Self Documenting Commands                                                     #
