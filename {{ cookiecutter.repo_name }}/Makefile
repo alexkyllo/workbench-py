@@ -121,7 +121,7 @@ models/model.joblib: $(PACKAGE_NAME)/train.py data/processed/train_data.csv
 # A recipe for splitting raw data into train and test sets
 data/raw/raw_test_data.csv data/raw/raw_train_data.csv &: $(PACKAGE_NAME)/split.py \
 data/raw/raw_data.csv
-	$(PYTHON) $^ 0.3 data/raw/raw_test_data.csv data/raw/raw_train_data.csv
+	$(PYTHON) $^ 0.3 data/raw/raw_data.csv data/raw/raw_test_data.csv data/raw/raw_train_data.csv
 
 # A recipe for scoring the model on test data.
 data/processed/scored_data.csv: $(PACKAGE_NAME)/score.py data/processed/test_data.csv
