@@ -41,9 +41,6 @@ export
 # files by these names:
 .PHONY: style environment install data figures reports
 
-# Change this to python3 if needed depending on your environment setup
-PYTHON_INTERPRETER=python
-
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
@@ -54,8 +51,12 @@ environment:
 	@echo ">>> Conda env created. Activate with:\nconda activate $(REPO_NAME)"
 
 ## Make Dataset
-data: requirements
-	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
+data: data/raw/raw_data.csv
+
+data/raw/raw_data.csv: $(PACKAGE_NAME)/get.py
+	$(PYTHON) $(PACKAGE_NAME)/get.py help Samples queries/query.csl \
+$(BLOB_ACCOUNT) $(BLOB_CONTAINER) $(BLOB_KEY) $(REPO_NAME) raw_data \
+data/raw/raw_data.csv
 
 ## Delete all compiled Python files
 clean:
@@ -69,10 +70,6 @@ lint:
 ## Format using black
 fmt:
 	black .
-
-## Test python environment is setup correctly
-test_environment:
-	$(PYTHON_INTERPRETER) test_environment.py
 
 #################################################################################
 # PROJECT RULES                                                                 #

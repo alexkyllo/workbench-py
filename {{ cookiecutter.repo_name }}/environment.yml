@@ -1,4 +1,4 @@
-name: {{ cookiecutter.package_name }}
+name: {{ cookiecutter.repo_name }}
 channels:
   - conda-forge
   - defaults
@@ -19,6 +19,7 @@ dependencies:
   - pre-commit
   - pylint
   - python=3.8
+  - python-dotenv
   - seaborn
   - scikit-learn
   - scipy
