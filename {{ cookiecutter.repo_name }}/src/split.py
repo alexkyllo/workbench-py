@@ -6,7 +6,6 @@ import logging
 import dotenv
 import click
 import pandas as pd
-from sklearn import model_selection
 
 @click.command()
 @click.argument("input_file", type=click.Path(exists=True))

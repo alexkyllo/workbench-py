@@ -15,6 +15,7 @@ Project Organization
     ├── figures/           <- Generated plots and figures (saved as .png files)
     ├── models/            <- Trained and serialized models, model predictions, or model summaries
     ├── notebooks/         <- Jupyter notebooks.
+    ├── pipelines/         <- Serialized scikit-learn data transformer pipelines.
     ├── references/        <- Data dictionaries, manuals, and all other explanatory materials.
     ├── reports            <- Generated analysis reports as HTML, PDF, etc.
     ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.

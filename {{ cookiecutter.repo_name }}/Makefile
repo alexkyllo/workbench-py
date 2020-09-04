@@ -103,10 +103,10 @@ data: data/processed/train_data.csv
 # $< is shorthand for "the first prerequisite in the list."
 # $^ is all of the prerequisites in the list
 # $@ is the target name
-data/processed/train_data.csv: $(PACKAGE_NAME)/clean.py data/raw/raw_train_data.csv
+data/processed/train_data.csv : $(PACKAGE_NAME)/transform.py data/raw/raw_train_data.csv
 	$(PYTHON) $^ $@ --fit
 
-data/processed/test_data.csv: $(PACKAGE_NAME)/clean.py data/raw/raw_test_data.csv
+data/processed/test_data.csv: $(PACKAGE_NAME)/transform.py data/raw/raw_test_data.csv
 	$(PYTHON) $^ $@
 
 data/raw/raw_data.csv: $(PACKAGE_NAME)/get.py
